@@ -1,0 +1,172 @@
+import org.openhab.core.library.types.*
+import org.openhab.core.persistence.*
+import org.openhab.model.script.actions.*
+import java.lang.Math
+
+rule "target Security"
+when
+	Item Areas_Main_targetMode changed
+then
+	if(Areas_Main_targetMode.state != Areas_Main_currentMode.state)
+	{
+		Areas_Main_currentMode.sendCommand(Areas_Main_targetMode.state.toString)
+	}
+end
+
+rule "current Security"
+when
+	Item Areas_Main_currentMode received update or
+	Item Areas_Main_currentMode changed or
+	System started
+then
+	if(Areas_Main_targetMode.state != Areas_Main_currentMode.state)
+	{
+		Areas_Main_targetMode.postUpdate(Areas_Main_currentMode.state)
+	}
+end
+
+
+rule "Convert_Temp_Master"
+when
+    Item Thermostats_MasterBed_Temp received update or
+    Item Thermostats_MasterBed_Temp changed or
+	System started
+then
+    var tempFahrenheit = (Thermostats_MasterBed_Temp.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_MasterBed_TempC.postUpdate(tempCelsius.doubleValue)
+end
+
+
+rule "Convert_Temp_Floor1"
+when
+	Item Thermostats_Floor1_Temp received update or
+    Item Thermostats_Floor1_Temp changed or
+	System started
+then
+    var tempFahrenheit = (Thermostats_Floor1_Temp.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_Floor1_TempC.postUpdate(tempCelsius.doubleValue)
+end
+
+
+rule "Convert_Temp_Floor2"
+when
+	Item Thermostats_Floor2_Temp received update or
+    Item Thermostats_Floor2_Temp changed or
+	System started
+then
+    var tempFahrenheit = (Thermostats_Floor2_Temp.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0 
+    Thermostats_Floor2_TempC.postUpdate(tempCelsius.doubleValue)
+end
+
+rule "Convert_CoolPoint_Floor2"
+when
+    Item Thermostats_Floor2_CoolPoint received update or
+    Item Thermostats_Floor2_CoolPoint changed or
+    System started
+then
+    var tempFahrenheit = (Thermostats_Floor2_CoolPoint.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_Floor2_CoolPointC.postUpdate(tempCelsius.doubleValue)
+end
+
+rule "Convert_HeatPoint_Floor2"
+when
+    Item Thermostats_Floor2_HeatPoint received update or
+    Item Thermostats_Floor2_HeatPoint changed or
+    System started
+then
+    var tempFahrenheit = (Thermostats_Floor2_HeatPoint.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_Floor2_HeatPointC.postUpdate(tempCelsius.doubleValue)
+end
+
+
+rule "Set_CoolPoint_Floor2"
+when
+    Item Thermostats_Floor2_CoolPointC changed
+then
+    var tempCelcius = (Thermostats_Floor2_CoolPointC.state as DecimalType).doubleValue
+    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0f
+    if (Thermostats_Floor2_CoolPoint.state != ((Math::round(tempFahrenheit.doubleValue)).intValue))
+    {
+        Thermostats_Floor2_CoolPoint.sendCommand((Math::round(tempFahrenheit.doubleValue)).intValue)
+    }
+end
+
+
+
+
+
+rule "North_Garage"
+when
+	Item NGarage changed or
+	Item NGarage received update
+then
+	if(Zones_NGarage.state == CLOSED && NGarage.state == ON)
+	{
+		NGarage_Relay.sendCommand(ON)
+		createTimer(now.plusSeconds(2)) [|
+		NGarage_Relay.sendCommand(OFF)
+		]
+	}
+	else if(Zones_NGarage.state == OPEN && NGarage.state == OFF)
+	{
+		NGarage_Relay.sendCommand(ON)
+		createTimer(now.plusSeconds(2)) [|
+		NGarage_Relay.sendCommand(OFF)
+		]
+	}
+end
+
+rule "Manual_North_Garage"
+when
+	Item Zones_NGarage changed
+then
+	if(Zones_NGarage.state == CLOSED)
+	{
+		NGarage.postUpdate(OFF)
+	}
+	else if(Zones_NGarage.state == OPEN)
+	{
+		NGarage.postUpdate(ON)
+	}
+end
+
+rule "South_Garage"
+when
+	Item SGarage changed or
+	Item SGarage received update
+then
+	if(Zones_SGarage.state == CLOSED && SGarage.state == ON)
+	{
+		SGarage_Relay.sendCommand(ON)
+		createTimer(now.plusSeconds(2)) [|
+		SGarage_Relay.sendCommand(OFF)
+		]
+	}
+	else if(Zones_SGarage.state == OPEN && SGarage.state == OFF)
+	{
+		SGarage_Relay.sendCommand(ON)
+		createTimer(now.plusSeconds(2)) [|
+		SGarage_Relay.sendCommand(OFF)
+		]
+	}
+end
+
+rule "Manual_South_Garage"
+when
+	Item Zones_SGarage changed
+then
+	if(Zones_SGarage.state == CLOSED)
+	{
+		SGarage.postUpdate(OFF)
+	}
+	else if(Zones_SGarage.state == OPEN)
+	{
+		SGarage.postUpdate(ON)
+	}
+end
+
