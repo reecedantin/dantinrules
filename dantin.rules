@@ -26,7 +26,7 @@ then
 end
 
 
-rule "Convert_Temp_Master"
+rule "Convert_Temp_MasterBed"
 when
     Item Thermostats_MasterBed_Temp received update or
     Item Thermostats_MasterBed_Temp changed or
@@ -35,6 +35,52 @@ then
     var tempFahrenheit = (Thermostats_MasterBed_Temp.state as DecimalType).doubleValue
     var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
     Thermostats_MasterBed_TempC.postUpdate(tempCelsius.doubleValue)
+end
+
+rule "Convert_CoolPoint_MasterBed"
+when
+    Item Thermostats_MasterBed_CoolPoint received update or
+    Item Thermostats_MasterBed_CoolPoint changed or
+    System started
+then
+    var tempFahrenheit = (Thermostats_MasterBed_CoolPoint.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_MasterBed_CoolPointC.postUpdate(tempCelsius.doubleValue)
+end
+
+rule "Convert_HeatPoint_MasterBed"
+when
+    Item Thermostats_MasterBed_HeatPoint received update or
+    Item Thermostats_MasterBed_HeatPoint changed or
+    System started
+then
+    var tempFahrenheit = (Thermostats_MasterBed_HeatPoint.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_MasterBed_HeatPointC.postUpdate(tempCelsius.doubleValue)
+end
+
+rule "Set_CoolPoint_MasterBed"
+when
+    Item Thermostats_MasterBed_CoolPointC changed
+then
+    var tempCelcius = (Thermostats_MasterBed_CoolPointC.state as DecimalType).doubleValue
+    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0
+    if (Thermostats_MasterBed_CoolPoint.state != ((Math::round(tempFahrenheit.doubleValue)).intValue))
+    {
+        Thermostats_MasterBed_CoolPoint.sendCommand((Math::round(tempFahrenheit.doubleValue)).intValue)
+    }
+end
+
+rule "Set_HeatPoint_MasterBed"
+when
+    Item Thermostats_MasterBed_HeatPointC changed
+then
+    var tempCelcius = (Thermostats_MasterBed_HeatPointC.state as DecimalType).doubleValue
+    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0
+    if (Thermostats_MasterBed_HeatPoint.state != ((Math::round(tempFahrenheit.doubleValue)).intValue))
+    {
+        Thermostats_MasterBed_HeatPoint.sendCommand((Math::round(tempFahrenheit.doubleValue)).intValue)
+    }
 end
 
 
@@ -48,6 +94,53 @@ then
     var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
     Thermostats_Floor1_TempC.postUpdate(tempCelsius.doubleValue)
 end
+
+rule "Convert_CoolPoint_Floor1"
+when
+    Item Thermostats_Floor1_CoolPoint received update or
+    Item Thermostats_Floor1_CoolPoint changed or
+    System started
+then
+    var tempFahrenheit = (Thermostats_Floor1_CoolPoint.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_Floor1_CoolPointC.postUpdate(tempCelsius.doubleValue)
+end
+
+rule "Convert_HeatPoint_Floor1"
+when
+    Item Thermostats_Floor1_HeatPoint received update or
+    Item Thermostats_Floor1_HeatPoint changed or
+    System started
+then
+    var tempFahrenheit = (Thermostats_Floor1_HeatPoint.state as DecimalType).doubleValue
+    var tempCelsius = (tempFahrenheit -  32.0)  *  5.0/9.0
+    Thermostats_Floor1_HeatPointC.postUpdate(tempCelsius.doubleValue)
+end
+
+rule "Set_CoolPoint_Floor1"
+when
+    Item Thermostats_Floor1_CoolPointC changed
+then
+    var tempCelcius = (Thermostats_Floor1_CoolPointC.state as DecimalType).doubleValue
+    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0
+    if (Thermostats_Floor1_CoolPoint.state != ((Math::round(tempFahrenheit.doubleValue)).intValue))
+    {
+        Thermostats_Floor1_CoolPoint.sendCommand((Math::round(tempFahrenheit.doubleValue)).intValue)
+    }
+end
+
+rule "Set_HeatPoint_Floor1"
+when
+    Item Thermostats_Floor1_HeatPointC changed
+then
+    var tempCelcius = (Thermostats_Floor1_HeatPointC.state as DecimalType).doubleValue
+    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0
+    if (Thermostats_Floor1_HeatPoint.state != ((Math::round(tempFahrenheit.doubleValue)).intValue))
+    {
+        Thermostats_Floor1_HeatPoint.sendCommand((Math::round(tempFahrenheit.doubleValue)).intValue)
+    }
+end
+
 
 
 rule "Convert_Temp_Floor2"
@@ -83,16 +176,27 @@ then
     Thermostats_Floor2_HeatPointC.postUpdate(tempCelsius.doubleValue)
 end
 
-
 rule "Set_CoolPoint_Floor2"
 when
     Item Thermostats_Floor2_CoolPointC changed
 then
     var tempCelcius = (Thermostats_Floor2_CoolPointC.state as DecimalType).doubleValue
-    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0f
+    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0
     if (Thermostats_Floor2_CoolPoint.state != ((Math::round(tempFahrenheit.doubleValue)).intValue))
     {
         Thermostats_Floor2_CoolPoint.sendCommand((Math::round(tempFahrenheit.doubleValue)).intValue)
+    }
+end
+
+rule "Set_HeatPoint_Floor2"
+when
+    Item Thermostats_Floor2_HeatPointC changed
+then
+    var tempCelcius = (Thermostats_Floor2_HeatPointC.state as DecimalType).doubleValue
+    var tempFahrenheit = (tempCelcius * 9.0/5.0) + 32.0
+    if (Thermostats_Floor2_HeatPoint.state != ((Math::round(tempFahrenheit.doubleValue)).intValue))
+    {
+        Thermostats_Floor2_HeatPoint.sendCommand((Math::round(tempFahrenheit.doubleValue)).intValue)
     }
 end
 
